@@ -140,7 +140,7 @@ loss = tf.reduce_mean(stepwise_cross_entropy)
 train_op = tf.train.AdamOptimizer().minimize(loss)
 sess.run(tf.global_variables_initializer())
 
-batch_size = 3001
+batch_size = 1000
 
 def batch(inputs, max_sequence_length=None):
     """
@@ -235,8 +235,8 @@ def player_feed(pFeed):
 
 loss_track = []
 
-max_batches = 500
-batches_in_epoch = 1000
+max_batches = 50
+batches_in_epoch = 100
 
 try:
     for _batch in range(max_batches):
@@ -276,19 +276,19 @@ MARGIN = 1
 
 
 # Agent and player initial positions
-aPos = [38,7]
-pPos = [24,43]
+aPos = [20,7]
+pPos = [10,23]
 
 #player moveList
 pMov = [0,0,0,0]
 
 # Create Grid
 grid = []
-for row in range(60):
+for row in range(30):
     # Add an empty array that will hold each cell
     # in this row
     grid.append([])
-    for column in range(60):
+    for column in range(30):
         grid[row].append(0)  # Append a cell
 
 # grid[1][5] = 1
@@ -297,7 +297,7 @@ for row in range(60):
 pygame.init()
 
 # Set window H and W
-WINDOW_SIZE = [660, 660]
+WINDOW_SIZE = [330, 330]
 screen = pygame.display.set_mode(WINDOW_SIZE)
 
 # Set window title
@@ -328,21 +328,29 @@ while not done:
                 pMov.pop()
                 pMov.insert(0,2)
                 pPos[0] = pPos[0]-1
+                if pPos[0] < 0:
+                    pPos[0] = 29
             elif event.key == pygame.K_s:
                 print("Pressed s")
                 pMov.pop()
                 pMov.insert(0,3)
                 pPos[0] = pPos[0]+1
+                if pPos[0] > 29:
+                    pPos[0] = 0
             elif event.key == pygame.K_a:
                 print("Pressed a")
                 pMov.pop()
                 pMov.insert(0,4)
                 pPos[1] = pPos[1]-1
+                if pPos[1] < 0:
+                    pPos[1] = 29
             elif event.key == pygame.K_d:
                 print("Pressed d")
                 pMov.pop()
                 pMov.insert(0,5)
                 pPos[1] = pPos[1]+1
+                if pPos[1] > 29:
+                    pPos[1] = 0
             fd = player_feed(pMov)
             predict_ = sess.run(decoder_prediction,fd)
             for i, (inp, pred) in enumerate(zip(fd[encoder_inputs].T, predict_.T)):
@@ -351,12 +359,20 @@ while not done:
                 print('    predicted > {}'.format(pred))
                 if pred[0] == 2:
                     aPos[0] = aPos[0]-1
+                    if aPos[0] < 0:
+                        aPos[0] = 29
                 elif pred[0] == 3:
                     aPos[0] = aPos[0]+1
+                    if aPos[0] > 29:
+                        aPos[0] = 0
                 elif pred[0] == 4:
                     aPos[1] = aPos[1]-1
+                    if aPos[1] < 0:
+                        aPos[1] = 29
                 elif pred[0] == 5:
                     aPos[1] = aPos[1]+1
+                    if aPos[1] > 29:
+                        aPos[1] = 0
                 if i >= 2:
                     break
             print()
@@ -365,8 +381,8 @@ while not done:
     screen.fill(GREY)
 
     # Draw the grid
-    for row in range(60):
-        for column in range(60):
+    for row in range(30):
+        for column in range(30):
             color = WHITE
             if grid[row][column] == 1:
                 color = GREEN
